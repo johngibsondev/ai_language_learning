@@ -18,3 +18,6 @@ simpleaudio
 soundfile
 SpeechRecognition
 torch
+#On mac the following is required:
+#pip install piper-tts --no-deps piper-phonemize-cross onnxruntime numpy
+#pip install playsound@git+https://github.com/taconi/playsound
