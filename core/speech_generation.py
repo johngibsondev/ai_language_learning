@@ -11,12 +11,20 @@ class SpeechGeneration:
         self,
         models_path: str = "models",
         model_name: str = "es_MX-claude-14947-epoch-high.onnx",
+        temp_path: str = "temp",
     ):
-        self.voice = PiperVoice.load(os.path.join(models_path, model_name))
+        self.voice = PiperVoice.load(
+            os.path.join(models_path, model_name),
+        )
+        self.temp_path = temp_path
+        if not os.path.exists(temp_path):
+            os.makedirs(temp_path)
 
     def generate_speech(self, text: str):
         try:
-            temp_file = os.path.abspath(f"{time.time()}.wav")
+            temp_file = os.path.abspath(
+                os.path.join(self.temp_path, f"{time.time()}.wav")
+            )
             wav_file = wave.open(temp_file, "w")
             self.voice.synthesize(text, wav_file)
             wav_file.close()

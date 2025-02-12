@@ -2,11 +2,12 @@ import os
 import click
 import glob
 from dynaconf import Dynaconf
-from anki_deck_generation import AnkiDeckGeneration
-from generate_conversation import GenerateConversation
-from video_transcription import VideoTranscription
-from vocabulary_extraction import VocabularyExtraction
-from vocabulary_translation import VocabularyTranslation
+from core.anki_deck_generation import AnkiDeckGeneration
+from core.generate_conversation import GenerateConversation
+from core.speech_generation import SpeechGeneration
+from core.video_transcription import VideoTranscription
+from core.vocabulary_extraction import VocabularyExtraction
+from core.vocabulary_translation import VocabularyTranslation
 
 settings = Dynaconf(settings_files=["config.toml", ".secrets.toml"])
 
@@ -82,12 +83,36 @@ def get_vocabulary_from_video(name):
 
 
 def generate_conversation():
+
+    # speech_generation = SpeechGeneration(
+    #     models_path="models", model_name="es_MX-claude-14947-epoch-high.onnx"
+    # )
+
+    # speech_generation.generate_speech("¡Hola! Bien, gracias. ¿En qué puedo ayudarte?")
+
     conversation = GenerateConversation(
         settings.openai_server.url,
         settings.openai_server.api_key,
-        prompt="""You are a spanish shop assistent and you are helping a customer to find a product in the store. 
+        prompt="""You are a spanish shop assistent and you are helping a customer to find a product in the store.
         The customer is asking you for a product that you don't have in the store. How do you respond to the customer? Keep your responses short and simple.
         (speak only in Argentine Spanish)""",
+        speakers=[
+            {
+                "name": "Claude",
+                "language": "es",
+                "model": "es_MX-claude-14947-epoch-high.onnx",
+            },
+            {
+                "name": "Cortana",
+                "language": "es",
+                "model": "es_MX-cortana-19669-epoch-high.onnx",
+            },
+            {
+                "name": "Gevy",
+                "language": "es",
+                "model": "es_MX-gevy-10196-epoch-high.onnx",
+            },
+        ],
     )
     conversation.generate()
 
