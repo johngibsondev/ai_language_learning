@@ -1,13 +1,10 @@
 click
 dynaconf
 genanki
-mlx_whisper
 moviepy
 numpy
 openai
 openai_whisper
-PyObjC
-#piper_tts
 playsound
 pyannote.audio
 pyannote.core
@@ -20,6 +17,5 @@ soundfile
 SpeechRecognition
 torch
 pyaudio
-#On mac the following is required:
 #pip install piper-tts --no-deps piper-phonemize-cross onnxruntime numpy
 #pip install playsound@git+https://github.com/taconi/playsound

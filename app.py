@@ -4,11 +4,11 @@ import glob
 from dynaconf import Dynaconf
 from core.anki_deck_generation import AnkiDeckGeneration
 from core.generate_conversation import GenerateConversation
-from core.speech_generation import SpeechGeneration
 from core.video_transcription import VideoTranscription
 from core.vocabulary_extraction import VocabularyExtraction
 from core.vocabulary_translation import VocabularyTranslation
 
+print(torch.cuda.memory_summary())
 settings = Dynaconf(settings_files=["config.toml", ".secrets.toml"])
 
 
@@ -36,18 +36,10 @@ def get_vocabulary_from_video(name):
     for video_file in glob.glob("input_videos/*.*"):
         video_transcription.extract_audio(video_file)
     for audio_file in glob.glob(f"{settings.config.output_audio_path}/*.wav"):
-        for sentence_audio, clip_path, clip_name in video_transcription.split_sentences(
-            audio_file
-        ):
-            sentence_text, sentence_output_path = (
-                video_transcription.transcribe_sentence(
-                    sentence_audio, clip_path, clip_name
-                )
-            )
+        for sentence_audio, clip_path, clip_name in video_transcription.split_sentences(audio_file):
+            sentence_text, sentence_output_path = video_transcription.transcribe_sentence(sentence_audio, clip_path, clip_name)
 
-            sentence_output_path = sentence_output_path or os.path.join(
-                settings.config.output_text_path, clip_path, f"{clip_name}.txt"
-            )
+            sentence_output_path = sentence_output_path or os.path.join(settings.config.output_text_path, clip_path, f"{clip_name}.txt")
 
             for vocab_pos in vocabulary_extraction.tag_part_of_speech(sentence_text):
                 if vocab_pos:
@@ -75,20 +67,12 @@ def get_vocabulary_from_video(name):
                     print(f"Translated verbs: {translated_verbs}")
 
     for directory in os.listdir(settings.config.output_text_path):
-        anki_deck_generation = AnkiDeckGeneration(
-            directory, settings.config.output_text_path
-        )
+        anki_deck_generation = AnkiDeckGeneration(directory, settings.config.output_text_path)
         content = anki_deck_generation.get_deck_content()
         anki_deck_generation.generate_deck(content)
 
 
 def generate_conversation():
-
-    # speech_generation = SpeechGeneration(
-    #     models_path="models", model_name="es_MX-claude-14947-epoch-high.onnx"
-    # )
-
-    # speech_generation.generate_speech("¡Hola! Bien, gracias. ¿En qué puedo ayudarte?")
 
     conversation = GenerateConversation(
         settings.openai_server.url,

@@ -2,13 +2,18 @@ import io
 import numpy as np
 import soundfile as sf
 import speech_recognition as sr
-import whisper
+import torch
+
+if torch.mps.is_available():
+    import mlx_whisper as whisper
+else:
+    import whisper
 
 
 class MicrophoneTranscription:
     def __init__(
         self,
-        whisper_model="turbo",
+        whisper_model="small",
         language="es",
     ):
         self.language = language

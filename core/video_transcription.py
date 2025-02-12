@@ -6,7 +6,11 @@ from pyannote.core import Annotation
 from pyannote.audio import Pipeline
 from moviepy import VideoFileClip
 from pydub import AudioSegment
-import mlx_whisper
+
+if torch.mps.is_available():
+    import mlx_whisper as whisper
+else:
+    import whisper
 
 
 class VideoTranscription:
@@ -51,17 +55,13 @@ class VideoTranscription:
         sound.export(wav_file, format="wav")
         os.remove(mp3_file)
 
-    def transcribe_sentence(
-        self, temp_sentence_audio: str, clip_path: str = None, clip_name: str = None
-    ) -> Tuple[str, str]:
-        result = mlx_whisper.transcribe(
+    def transcribe_sentence(self, temp_sentence_audio: str, clip_path: str = None, clip_name: str = None) -> Tuple[str, str]:
+        result = whisper.transcribe(
             temp_sentence_audio,
             path_or_hf_repo=self.whisper_model,
         )
         clip_text = result["text"] if "text" in result else ""
-        output_text_path = os.path.join(
-            self.output_text_path, clip_path, f"{clip_name}.txt"
-        )
+        output_text_path = os.path.join(self.output_text_path, clip_path, f"{clip_name}.txt")
         if clip_path and clip_name:
             with open(
                 output_text_path,
@@ -86,9 +86,7 @@ class VideoTranscription:
             clip_number += 1
             if not os.path.exists(os.path.join(self.temp_path, clip_path)):
                 os.makedirs(os.path.join(self.temp_path, clip_path))
-            temp_sentence_audio = os.path.join(
-                self.temp_path, clip_path, f"{clip_name}.wav"
-            )
+            temp_sentence_audio = os.path.join(self.temp_path, clip_path, f"{clip_name}.wav")
             sound: AudioSegment = AudioSegment.from_wav(audio_path)
             start_seconds = turn.start * 1000
             end_seconds = turn.end * 1000

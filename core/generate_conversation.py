@@ -1,6 +1,5 @@
 from typing import List
 from openai import OpenAI
-
 from core.microphone_transcription import MicrophoneTranscription
 from core.speech_generation import SpeechGeneration
 
@@ -36,6 +35,7 @@ class GenerateConversation:
         self.language = language
         self.client = OpenAI(base_url=openai_url, api_key=openai_key)
         self.model = model
+        self.microphone_transcription = MicrophoneTranscription(language=language)
         self.speakers = {
             speaker["name"]: SpeechGeneration(
                 "models",
@@ -43,7 +43,6 @@ class GenerateConversation:
             )
             for speaker in speakers
         }
-        self.microphone_transcription = MicrophoneTranscription(language=language)
 
     def generate(self):
         messages = [
@@ -78,6 +77,3 @@ class GenerateConversation:
                     "content": agent_response,
                 }
             )
-
-
-# pip3 install PyObjC
